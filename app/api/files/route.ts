@@ -45,5 +45,11 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     message: 'File uploaded successfully!',
     fileName: `${process.env.NEXT_PUBLIC_API_URL}/api/files/${typePath}/${file.name}`,
+  },{
+    headers: {
+      'Access-Control-Allow-Origin': '*', // Thay '*' bằng domain cụ thể nếu cần
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
   });
 }
