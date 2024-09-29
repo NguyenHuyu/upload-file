@@ -39,6 +39,24 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       case '.gif':
         contentType = 'image/gif';
         break;
+      case '.webp':
+        contentType = 'image/webp';
+        break;
+      case '.svg':
+        contentType = 'image/svg+xml';
+        break;
+      case '.bmp':
+        contentType = 'image/bmp';
+        break;
+      case '.mp4':
+        contentType = 'video/mp4';
+        break;
+      case '.avi':
+        contentType = 'video/avi';
+        break;
+      case '.mpeg':
+        contentType = 'video/mpeg';
+        break;
       default:
         return NextResponse.json({ message: 'Unsupported file type' }, { status: 400 });
     }
