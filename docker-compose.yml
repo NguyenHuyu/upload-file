@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+   nextjs_file:
+      build:
+         context: .
+         dockerfile: Dockerfile
+      ports:
+         - '8009:8021'
+      env_file:
+         - .env
+      restart: always
