@@ -47,6 +47,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     message: 'File uploaded successfully!',
-    fileName: `${process.env.NEXT_PUBLIC_API_URL}/api/files/${typePath}/${file.name}`,
+    fileName: `${process.env.NEXT_PUBLIC_API_URL}/api/files/${file.name}?typePath=${typePath}`,
   });
 }
