@@ -47,6 +47,9 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 RUN mkdir -p /app/uploads && chown -R nextjs:nodejs /app/uploads
+RUN mkdir -p /app/uploads \
+    && chown -R nextjs:nodejs /app/uploads \
+    && chmod -R 755 /app/uploads
 
 # COPY --from=builder /app/uploads ./uploads
 COPY --from=builder /app/.next ./.next

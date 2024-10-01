@@ -1,7 +1,23 @@
-// app/api/files/[id]/route.ts
 import { promises as fs } from 'fs';
 import path from 'path';
 import { NextResponse, NextRequest } from 'next/server';
+import { fileTypeFromBuffer } from 'file-type';
+
+
+const allowedMimeTypes = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/svg+xml',
+  'image/bmp',
+  'video/mp4',
+  'video/avi',
+  'video/mpeg',
+];
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const { id, } = params;
@@ -13,7 +29,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({ message: 'No type path' }, { status: 400 });
   }
 
-  // Lấy đường dẫn tới file cần tìm trong thư mục uploads
+  const isValidPath = /^[a-zA-Z0-9-_]+$/.test(typePath);
+  if (!isValidPath) {
+    return NextResponse.json({ message: 'Invalid type path' }, { status: 400 });
+  }
+
   const uploadDir = path.join(process.cwd(), `uploads/${typePath}`);
   const filePath = path.join(uploadDir, id);
 
@@ -24,49 +44,24 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     // Đọc file
     const file = await fs.readFile(filePath);
 
-    // Xác định loại MIME từ phần mở rộng của file
-    const ext = path.extname(filePath).toLowerCase();
-    let contentType = '';
-
-    switch (ext) {
-      case '.jpg':
-      case '.jpeg':
-        contentType = 'image/jpeg';
-        break;
-      case '.png':
-        contentType = 'image/png';
-        break;
-      case '.gif':
-        contentType = 'image/gif';
-        break;
-      case '.webp':
-        contentType = 'image/webp';
-        break;
-      case '.svg':
-        contentType = 'image/svg+xml';
-        break;
-      case '.bmp':
-        contentType = 'image/bmp';
-        break;
-      case '.mp4':
-        contentType = 'video/mp4';
-        break;
-      case '.avi':
-        contentType = 'video/avi';
-        break;
-      case '.mpeg':
-        contentType = 'video/mpeg';
-        break;
-      default:
-        return NextResponse.json({ message: 'Unsupported file type' }, { status: 400 });
+    // Giới hạn kích thước file trả về
+    if (file.byteLength > MAX_FILE_SIZE) {
+      return NextResponse.json({ message: 'File too large' }, { status: 413 });
     }
 
-    // Trả về file ảnh
+    // Kiểm tra loại MIME thực sự từ nội dung file
+    const fileType = await fileTypeFromBuffer(file);
+
+    if (!fileType || !allowedMimeTypes.includes(fileType.mime)) {
+      return NextResponse.json({ message: 'Unsupported file type' }, { status: 400 });
+    }
+
+    // Trả về file với MIME type tương ứng
     return new NextResponse(file, {
       headers: {
-        'Content-Type': contentType,
+        'Content-Type': fileType.mime,
       },
-    });
+    })
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return NextResponse.json({ message: 'File not found' }, { status: 404 });
